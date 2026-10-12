@@ -52,6 +52,125 @@ window.__ModuleLoader__.load({
       step: DEFAULT_STEP,
     };
 
+    // --------------------------------------------------------------- dictionaries
+
+    /**
+     * Copy for both shipped locales, registered as one namespace.
+     *
+     * English is the framework's fallback locale, so a key missing from `zh`
+     * resolves here rather than showing the key itself; the two dictionaries
+     * therefore carry identical key sets. Values are flat templates — `{n}`
+     * placeholders are substituted by the caller where a string needs one.
+     */
+    const en = {
+      tabTitle: 'Auto Snake',
+      tabGuide: 'A neon Snake game that plays itself, with live solver tuning.',
+      statScore: 'Score',
+      statBest: 'Best',
+      statLength: 'Length',
+      autoPlay: 'Auto-play',
+      stopAi: 'Stop AI',
+      autoPlayHint: 'Let the solver play by itself',
+      pause: 'Pause',
+      resume: 'Resume',
+      start: 'Start',
+      playAgain: 'Play Again',
+      gameOver: 'Game Over',
+      paused: 'Paused',
+      idleTitle: 'Auto Snake',
+      deadAuto: 'Scored {n}. Restarting…',
+      deadManual: 'Scored {n}. Hit Play Again, or hand it to the AI.',
+      pausedHint: 'Take your time. Space resumes.',
+      idleHint: 'Let the AI drive, or steer with the arrow keys. Every gem is +1.',
+      badgeAi: 'AI driving',
+      badgeManual: 'Manual',
+      shortLen: 'Len {n}',
+      stepsPerSec: '{n} steps/s',
+      stateRunning: 'Running',
+      statePaused: 'Paused',
+      stateWall: 'Wall',
+      stateSelf: 'Self',
+      stateStopped: 'Stopped',
+      stateReady: 'Ready',
+      tuneMargin: 'Safety margin',
+      tuneDelay: 'Step delay',
+      tuneLookahead: 'Tail lookahead',
+      tuneHint: 'Safety margin demands the move leave that many more free cells than the body length. '
+        + 'Higher plays cautiously and takes long routes; at 0 it is greedy. Tail lookahead also '
+        + 'requires a path back to the tail, which is what stops it walling itself in.',
+      aiRuns: 'AI runs {n}',
+      peak: 'peak {n}',
+      deaths: 'deaths {n}',
+      deathsSplit: 'deaths {n} (wall {w} / self {s})',
+      configBestTitle: 'High score',
+      configBestValue: 'Best AI run so far: {n} gems.',
+      configBestEmpty: 'No runs recorded in this browser yet.',
+      reset: 'Reset',
+    };
+
+    const zh = {
+      tabTitle: '自动贪吃蛇',
+      tabGuide: '一条会自动游玩的霓虹贪吃蛇，可实时调校求解器。',
+      statScore: '得分',
+      statBest: '最高',
+      statLength: '长度',
+      autoPlay: '自动游玩',
+      stopAi: '停止 AI',
+      autoPlayHint: '让求解器自行游玩',
+      pause: '暂停',
+      resume: '继续',
+      start: '开始',
+      playAgain: '再来一局',
+      gameOver: '游戏结束',
+      paused: '已暂停',
+      idleTitle: '自动贪吃蛇',
+      deadAuto: '得分 {n}，正在重开…',
+      deadManual: '得分 {n}。点「再来一局」，或交给 AI。',
+      pausedHint: '慢慢来，按空格继续。',
+      idleHint: '让 AI 驾驶，或用方向键自己操作。每颗宝石 +1。',
+      badgeAi: 'AI 驾驶中',
+      badgeManual: '手动',
+      shortLen: '长度 {n}',
+      stepsPerSec: '{n} 步/秒',
+      stateRunning: '运行中',
+      statePaused: '已暂停',
+      stateWall: '撞墙',
+      stateSelf: '撞到自己',
+      stateStopped: '已停止',
+      stateReady: '就绪',
+      tuneMargin: '安全余量',
+      tuneDelay: '步进延迟',
+      tuneLookahead: '尾部预判',
+      tuneHint: '安全余量要求每一步留下的空格数比蛇身长度多出该数量。数值越高越谨慎、路线越长；为 0 时变得贪婪。'
+        + '尾部预判还会要求蛇头能回到蛇尾，这正是它避免把自己困死的原因。',
+      aiRuns: 'AI 局数 {n}',
+      peak: '峰值 {n}',
+      deaths: '死亡 {n}',
+      deathsSplit: '死亡 {n}（撞墙 {w} / 撞自己 {s}）',
+      configBestTitle: '最高分',
+      configBestValue: '目前最佳 AI 成绩：{n} 颗宝石。',
+      configBestEmpty: '此浏览器还没有记录任何对局。',
+      reset: '重置',
+    };
+
+    /**
+     * Substitute `{name}` placeholders in a translated template.
+     *
+     * The framework's `t` only returns the template, so interpolation is the
+     * caller's job. Unknown placeholders are left verbatim rather than blanked,
+     * which makes a typo visible instead of silently eating the value.
+     *
+     * @param {string} template - the translated template.
+     * @param {object} [vars] - placeholder values, stringified on use.
+     * @returns {string} the filled string.
+     */
+    function fill(template, vars) {
+      if (!vars) return template;
+      return template.replace(/\{(\w+)\}/g, (whole, key) => (
+        Object.prototype.hasOwnProperty.call(vars, key) ? String(vars[key]) : whole
+      ));
+    }
+
     const CSS = `
 .dsh-as { display: flex; flex-direction: column; gap: 10px; padding: 10px; height: 100%; box-sizing: border-box; overflow: auto; }
 .dsh-as-hud { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
@@ -665,9 +784,10 @@ window.__ModuleLoader__.load({
      * mode is on the loop steers before each step, which is what makes the
      * difference between a demo and a run that survives.
      *
+     * @param {object} props - slot props; carries the injected `t` translator.
      * @returns {object} React element tree.
      */
-    function AutoSnakePanel() {
+    function AutoSnakePanel({ t }) {
       ensureStyle();
       const canvasRef = React.useRef(null);
       const engineRef = React.useRef(null);
@@ -704,8 +824,8 @@ window.__ModuleLoader__.load({
       // window only while mounted, and ignored while typing in a field.
       React.useEffect(() => {
         const onKey = (event) => {
-          const t = event.target;
-          const typing = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
+          const target = event.target;
+          const typing = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
           if (typing) return;
           const k = event.key;
           let handled = true;
@@ -794,8 +914,8 @@ window.__ModuleLoader__.load({
 
       /** Update one solver knob. */
       const setKnob = (k, v) => {
-        setTune((t) => {
-          const next = { ...t, [k]: v };
+        setTune((prev) => {
+          const next = { ...prev, [k]: v };
           tuneRef.current = next;
           return next;
         });
@@ -808,69 +928,69 @@ window.__ModuleLoader__.load({
       const overlay = phase === 'idle' || phase === 'paused' || phase === 'dead'
         ? h('div', { className: 'dsh-as-overlay' },
             h('div', { className: 'dsh-as-overlaytitle' },
-              phase === 'dead' ? 'Game Over' : phase === 'paused' ? 'Paused' : 'Auto Snake'),
+              phase === 'dead' ? t('gameOver') : phase === 'paused' ? t('paused') : t('idleTitle')),
             h('div', { className: 'dsh-as-overlaytext' },
               phase === 'dead'
                 ? (ai
-                    ? 'Scored ' + engine.score + '. Restarting\u2026'
-                    : 'Scored ' + engine.score + '. Hit Play Again, or hand it to the AI.')
+                    ? fill(t('deadAuto'), { n: engine.score })
+                    : fill(t('deadManual'), { n: engine.score }))
                 : phase === 'paused'
-                  ? 'Take your time. Space resumes.'
-                  : 'Let the AI drive, or steer with the arrow keys. Every gem is +1.'),
+                  ? t('pausedHint')
+                  : t('idleHint')),
             h('button', {
               type: 'button',
               className: 'dsh-as-btn primary',
               onClick: phase === 'paused'
                 ? () => { engine.togglePause(); tick((v) => v + 1); }
                 : () => restart(),
-            }, phase === 'dead' ? 'Play Again' : phase === 'paused' ? 'Resume' : 'Start'),
+            }, phase === 'dead' ? t('playAgain') : phase === 'paused' ? t('resume') : t('start')),
           )
         : null;
 
       return h('div', { className: 'dsh-as' },
         h('div', { className: 'dsh-as-hud' },
           h('div', { className: 'dsh-as-stat' },
-            h('div', { className: 'dsh-as-statlabel' }, 'Score'),
+            h('div', { className: 'dsh-as-statlabel' }, t('statScore')),
             h('div', { className: 'dsh-as-statvalue' }, String(engine.score))),
           h('div', { className: 'dsh-as-stat' },
-            h('div', { className: 'dsh-as-statlabel' }, 'Best'),
+            h('div', { className: 'dsh-as-statlabel' }, t('statBest')),
             h('div', { className: 'dsh-as-statvalue' }, String(best))),
           h('div', { className: 'dsh-as-stat' },
-            h('div', { className: 'dsh-as-statlabel' }, 'Length'),
+            h('div', { className: 'dsh-as-statlabel' }, t('statLength')),
             h('div', { className: 'dsh-as-statvalue' }, String(engine.snake.length))),
           h('div', { className: 'dsh-as-spacer' }),
           h('button', {
             type: 'button',
             className: ai ? 'dsh-as-btn ai' : 'dsh-as-btn',
             onClick: toggleAi,
-            title: 'Let the solver play by itself',
-          }, ai ? '\u25A0 Stop AI' : '\u25B6 Auto-play'),
+            title: t('autoPlayHint'),
+          }, ai ? '\u25A0 ' + t('stopAi') : '\u25B6 ' + t('autoPlay')),
           h('button', {
             type: 'button',
             className: 'dsh-as-btn',
             disabled: phase === 'dead' || phase === 'idle',
             onClick: () => { engine.togglePause(); tick((v) => v + 1); },
-          }, phase === 'paused' ? 'Resume' : 'Pause'),
+          }, phase === 'paused' ? t('resume') : t('pause')),
         ),
         h('div', { className: 'dsh-as-stage' },
           h('canvas', { className: 'dsh-as-canvas', ref: canvasRef }),
           overlay,
         ),
         h('div', { className: 'dsh-as-foot' },
-          h('span', { className: ai ? 'dsh-as-badge ai' : 'dsh-as-badge' }, ai ? 'AI driving' : 'Manual'),
-          h('span', null, 'Len ' + engine.snake.length),
+          h('span', { className: ai ? 'dsh-as-badge ai' : 'dsh-as-badge' }, ai ? t('badgeAi') : t('badgeManual')),
+          h('span', null, fill(t('shortLen'), { n: engine.snake.length })),
           h('span', null, '\u00b7'),
-          h('span', null, (1000 / tune.step).toFixed(1) + ' steps/s'),
+          h('span', null, fill(t('stepsPerSec'), { n: (1000 / tune.step).toFixed(1) })),
           h('span', null, '\u00b7'),
           h('span', null,
-            phase === 'running' ? 'Running'
-              : phase === 'paused' ? 'Paused'
-                : phase === 'dead' ? (engine.deathCause === 'wall' ? 'Wall' : engine.deathCause === 'self' ? 'Self' : 'Stopped')
-                  : 'Ready'),
+            phase === 'running' ? t('stateRunning')
+              : phase === 'paused' ? t('statePaused')
+                : phase === 'dead' ? (engine.deathCause === 'wall' ? t('stateWall') : engine.deathCause === 'self' ? t('stateSelf') : t('stateStopped'))
+                  : t('stateReady')),
         ),
         h('div', { className: 'dsh-as-tune' },
           h('div', { className: 'dsh-as-tunerow' },
-            h('label', { htmlFor: 'dsh-as-margin' }, 'Safety margin'),
+            h('label', { htmlFor: 'dsh-as-margin' }, t('tuneMargin')),
             h('input', {
               id: 'dsh-as-margin',
               type: 'range',
@@ -883,9 +1003,9 @@ window.__ModuleLoader__.load({
             h('span', { className: 'dsh-as-tunerval' }, String(tune.margin)),
           ),
           h('div', { className: 'dsh-as-tunerow' },
-            h('label', { htmlFor: 'dsh-as-speed' }, 'Speed'),
+            h('label', { htmlFor: 'dsh-as-delay' }, t('tuneDelay')),
             h('input', {
-              id: 'dsh-as-speed',
+              id: 'dsh-as-delay',
               type: 'range',
               min: MIN_STEP,
               max: MAX_STEP,
@@ -896,7 +1016,7 @@ window.__ModuleLoader__.load({
             h('span', { className: 'dsh-as-tunerval' }, tune.step + 'ms'),
           ),
           h('div', { className: 'dsh-as-tunerow' },
-            h('label', { htmlFor: 'dsh-as-look' }, 'Tail lookahead'),
+            h('label', { htmlFor: 'dsh-as-look' }, t('tuneLookahead')),
             h('input', {
               id: 'dsh-as-look',
               type: 'checkbox',
@@ -905,17 +1025,16 @@ window.__ModuleLoader__.load({
             }),
             h('span', { className: 'dsh-as-spacer' }),
           ),
-          h('div', { className: 'dsh-as-tunehint' },
-            'Safety margin demands the move leave that many more free cells than the body length. '
-            + 'Higher plays cautiously and takes long routes; at 0 it is greedy. Tail lookahead also '
-            + 'requires a path back to the tail, which is what stops it walling itself in.'),
+          h('div', { className: 'dsh-as-tunehint' }, t('tuneHint')),
         ),
         h('div', { className: 'dsh-as-foot' },
-          h('span', null, 'AI runs ' + stats.runs),
+          h('span', null, fill(t('aiRuns'), { n: stats.runs })),
           h('span', null, '\u00b7'),
-          h('span', null, 'peak ' + stats.peak),
+          h('span', null, fill(t('peak'), { n: stats.peak })),
           h('span', null, '\u00b7'),
-          h('span', null, 'deaths ' + lost + (lost > 0 ? ' (wall ' + stats.deaths.wall + ' / self ' + stats.deaths.self + ')' : '')),
+          h('span', null, lost > 0
+            ? fill(t('deathsSplit'), { n: lost, w: stats.deaths.wall, s: stats.deaths.self })
+            : fill(t('deaths'), { n: lost })),
         ),
         h('div', { className: 'dsh-as-pad' },
           h('div', { className: 'dsh-as-dbtn blank' }),
@@ -939,16 +1058,17 @@ window.__ModuleLoader__.load({
      * Shows the persisted high score and clears it. The game needs no
      * configuration of its own, so this stays deliberately small.
      *
+     * @param {object} props - slot props; carries the injected `t` translator.
      * @returns {object} React element tree.
      */
-    function AutoSnakeConfig() {
+    function AutoSnakeConfig({ t }) {
       ensureStyle();
       const [best, setBest] = React.useState(() => readBest());
       return h('div', { className: 'dsh-as-setrow' },
         h('div', { className: 'dsh-as-settext' },
-          h('div', { className: 'dsh-as-settitle' }, 'High score'),
+          h('div', { className: 'dsh-as-settitle' }, t('configBestTitle')),
           h('div', { className: 'dsh-as-setdesc' },
-            best > 0 ? 'Best AI run so far: ' + best + ' gems.' : 'No runs recorded in this browser yet.'),
+            best > 0 ? fill(t('configBestValue'), { n: best }) : t('configBestEmpty')),
         ),
         h('div', { className: 'dsh-as-spacer' }),
         h('button', {
@@ -956,18 +1076,20 @@ window.__ModuleLoader__.load({
           className: 'dsh-as-btn',
           disabled: best === 0,
           onClick: () => { writeBest(0); setBest(0); },
-        }, 'Reset'),
+        }, t('reset')),
       );
     }
 
     // ---------------------------------------------------------------- lifecycle
 
-    // Declaring `sidebarRightTabs` makes Cordis wait for the service before
-    // `apply` runs, so the tab-type registration below can never silently no-op.
-    const inject = ['slots', 'sidebarRightTabs'];
+    // Declaring these makes Cordis wait for the services before `apply` runs, so
+    // neither the dictionary registration nor the tab-type registration can
+    // silently no-op against a service that has not loaded yet.
+    const inject = ['slots', 'locale', 'sidebarRightTabs'];
 
     /**
-     * Register the tab type, the panel body, and the settings row.
+     * Register the dictionaries, the tab type, the panel body, and the settings
+     * row.
      *
      * A right-sidebar tab is a two-stage contribution, and both stages are
      * required: stage one declares what the type **is** (its `sidebarRightTabs`
@@ -976,32 +1098,44 @@ window.__ModuleLoader__.load({
      * them. Without stage one nothing can `openTab('auto-snake')`, so the panel
      * is unreachable — the body alone is not enough.
      *
+     * Copy goes through the framework locale service rather than literal strings,
+     * so the panel and the dock's guide entry follow the active language and
+     * switch live. The tab type's `title`/`guide` copy is thunked, which the
+     * registry re-reads on every use — a language change needs no re-registration.
+     *
      * @param {object} ctx - the Cordis client context.
      */
     function apply(ctx) {
+      // Register both locales in one call under this plugin's namespace, then
+      // bind the stable translator the slot bodies receive.
+      ctx.effect(() => ctx.locale.register(NS, { en, zh }), 'dsh-auto-snake: dictionaries');
+      const t = ctx.locale.bind(NS);
+
       // Stage one: the tab type. No `patterns`, so it is a page type opened by
-      // kind. Its `guide` row is what lists "Auto Snake" on the right dock's
+      // kind. Its `guide` row is what lists the tab on the right dock's
       // add/guide page — without it the type is openable by API but has no
       // user-facing entry point.
       ctx.effect(() => ctx.sidebarRightTabs.register({
         id: NS,
         kind: NS,
         priority: 'extension',
-        title: () => 'Auto Snake',
+        title: () => t('tabTitle'),
         guide: [{
           id: NS,
           order: 75,
-          title: () => 'Auto Snake',
-          description: () => 'A neon Snake game that plays itself, with live solver tuning.',
+          title: () => t('tabTitle'),
+          description: () => t('tabGuide'),
         }],
       }), 'dsh-auto-snake: tab type');
 
       // Stage two: the body. `sidebar.right.pane.tab` is a KEYED slot, so the
       // dispatch option is `key` (not `id`, which belongs to list slots), and
-      // its value is the tab type definition's id.
+      // its value is the tab type definition's id. `locale: NS` hands the body
+      // the same translator through its props.
       ctx.slots.inject('sidebar.right.pane.tab', () => ctx.slots.register({
         name: 'sidebar.right.pane.tab',
         key: NS,
+        locale: NS,
       }, AutoSnakePanel));
 
       // The row on this bundle's page in Settings -> Plugins, keyed by package
@@ -1009,6 +1143,7 @@ window.__ModuleLoader__.load({
       ctx.slots.inject('plugins.bundle.config', () => ctx.slots.register({
         name: 'plugins.bundle.config',
         key: 'dsh-auto-snake',
+        locale: NS,
       }, AutoSnakeConfig));
     }
 
