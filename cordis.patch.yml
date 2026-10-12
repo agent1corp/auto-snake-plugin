@@ -1,0 +1,9 @@
+# dsh-auto-snake bundle patch.
+#
+# The entry is addressed by PACKAGE NAME (never a file:// URL): the client boot
+# graph is composed by scanning enabled Loader entries and reading each one's
+# package `dsh.client` manifest. An entry named by URL has no package to read,
+# so no browser bundle is emitted and the panel never appears.
+- insert:
+    - id: auto-snake
+      name: 'dsh-auto-snake'
