@@ -962,20 +962,46 @@ window.__ModuleLoader__.load({
 
     // ---------------------------------------------------------------- lifecycle
 
-    const inject = ['slots'];
+    // Declaring `sidebarRightTabs` makes Cordis wait for the service before
+    // `apply` runs, so the tab-type registration below can never silently no-op.
+    const inject = ['slots', 'sidebarRightTabs'];
 
     /**
-     * Register the panel and the settings row.
+     * Register the tab type, the panel body, and the settings row.
+     *
+     * A right-sidebar tab is a two-stage contribution, and both stages are
+     * required: stage one declares what the type **is** (its `sidebarRightTabs`
+     * definition), stage two supplies what it **renders** (the keyed
+     * `sidebar.right.pane.tab` seat). The definition's `id` is the thread between
+     * them. Without stage one nothing can `openTab('auto-snake')`, so the panel
+     * is unreachable — the body alone is not enough.
      *
      * @param {object} ctx - the Cordis client context.
      */
     function apply(ctx) {
-      // `sidebar.right.pane.tab` is a KEYED slot, so the dispatch option is
-      // `key` (not `id`, which belongs to list slots), and its value is the tab
-      // type definition's id.
+      // Stage one: the tab type. No `patterns`, so it is a page type opened by
+      // kind. Its `guide` row is what lists "Auto Snake" on the right dock's
+      // add/guide page — without it the type is openable by API but has no
+      // user-facing entry point.
+      ctx.effect(() => ctx.sidebarRightTabs.register({
+        id: NS,
+        kind: NS,
+        priority: 'extension',
+        title: () => 'Auto Snake',
+        guide: [{
+          id: NS,
+          order: 75,
+          title: () => 'Auto Snake',
+          description: () => 'A neon Snake game that plays itself, with live solver tuning.',
+        }],
+      }), 'dsh-auto-snake: tab type');
+
+      // Stage two: the body. `sidebar.right.pane.tab` is a KEYED slot, so the
+      // dispatch option is `key` (not `id`, which belongs to list slots), and
+      // its value is the tab type definition's id.
       ctx.slots.inject('sidebar.right.pane.tab', () => ctx.slots.register({
         name: 'sidebar.right.pane.tab',
-        key: 'auto-snake',
+        key: NS,
       }, AutoSnakePanel));
 
       // The row on this bundle's page in Settings -> Plugins, keyed by package

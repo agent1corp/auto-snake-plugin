@@ -44,6 +44,8 @@ dsh plugin --profile web add /home/dev/A1Corp/myprojects/dsh-plugins/auto-snake-
 
 Then restart `dsh web`. The bundle is addressed by package name in `cordis.patch.yml` — an entry named by `file://` URL has no package to read, so no browser bundle is emitted.
 
+To open the panel: expand the right sidebar and pick **Auto Snake** on the guide/add page.
+
 ## Layout
 
 ```
@@ -64,7 +66,9 @@ client.js           the whole game: engine, solver, canvas renderer, React panel
 
 ## Status
 
-The game, solver and panel are complete and unit-tested against a mock Cordis context (both slot registrations fire). One integration question is still open, recorded in `.TODO.md`: this DSH build has no client-side tab-type registry service, so the panel currently registers its body at `sidebar.right.pane.tab` but nothing yet declares the tab type that opens it.
+The game, solver and panel are complete and unit-tested against a mock Cordis context. The tab is opened through the right sidebar's own two-stage registration: `ctx.sidebarRightTabs.register(…)` declares the type (which is what lists **Auto Snake** on the dock's add/guide page and makes `openTab('auto-snake')` legal), and the keyed `sidebar.right.pane.tab` seat supplies its body under that type's `id`.
+
+Open the panel from the right dock's **+ / guide** page, or programmatically with `sidebarRight.openTab('auto-snake')`.
 
 ## License
 
