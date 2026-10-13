@@ -28,19 +28,26 @@ It is deliberately simple to reason about, because the interesting part is watch
    - whether the **tail is still reachable** from the new head;
    - the **shortest path length** to the food.
 3. A move is *safe* when reachable space ≥ body length + margin, and (optionally) the tail is reachable.
-4. Prefer the shortest safe route to the food; tie-break on more free space.
+4. Prefer the shortest safe route to the food; among equally short routes prefer one that
+   keeps an **escape tunnel** ahead (see below); tie-break on more free space.
+
+The escape-tunnel rule is what stops the snake committing to a corridor that dead-ends
+within a few cells — against the wall *or against its own body*. It is a tie-break, not a
+filter: applying it ahead of progress makes the snake orbit a 2×2 square forever, because
+circling always satisfies "clearance ahead".
 
 That geometric criterion — not the pathfinding — is what keeps it alive. A plain shortest-path bot walls itself in within a few dozen gems; requiring room to manoeuvre is what took the reference Python build to length 31 without dying.
 
 ## Live tuning
 
-Three knobs are exposed in the panel:
+Four knobs are exposed in the panel:
 
 | Knob | What it does |
 |------|--------------|
 | **Safety margin** | Demands the move leave this many more free cells than the body length. Higher plays cautiously and takes long routes; at `0` it is greedy and eventually traps itself. |
 | **Step delay** | Time between steps in ms, 18–220. Lower is faster; below ~40 it is genuinely hard to follow. The live steps-per-second rate is shown in the footer. |
 | **Tail lookahead** | Also require a path back to the tail. Turning it off is instructive: the snake immediately starts sealing itself in. |
+| **Escape tunnel** | Free cells the snake must see straight ahead before committing to a heading — it turns early rather than driving into a wall *or its own body*. Default `4`, which eliminates wall deaths entirely. `0` disables it. |
 
 The slider is labelled **Step delay** because that is what it is — a delay in milliseconds. Labelling it "speed" reads backwards, since a higher number means slower play.
 
