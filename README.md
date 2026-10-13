@@ -51,26 +51,41 @@ To open the panel: expand the right sidebar and pick **Auto Snake** on the guide
 ## Layout
 
 ```
-package.json        manifest; dsh.bundle + dsh.client blocks
+package.json        manifest; dsh.bundle + dsh.client blocks, icon, repository
 cordis.patch.yml    Loader row, addressed by package name
 index.js            Host half (deliberately empty — all UI is client-side)
 client.js           the whole game: engine, solver, canvas renderer, React panel,
-                    plus both locale dictionaries (en/zh)
+                    plus both UI dictionaries (en/zh)
+icon.svg            plugin glyph, shown in the plugin list
+locale/en.json      plugin-list display metadata (title, description)
+locale/zh.json      the same, in Chinese
 ```
 
 ## Languages
 
-All UI copy — the panel, the HUD, the tuning knobs, the settings row, and the dock's
-guide entry — is bilingual, following the framework locale service:
+Two independent mechanisms are in play, and they cover different surfaces:
+
+| Mechanism | File | Covers |
+|-----------|------|--------|
+| **UI dictionaries** | `client.js` (inline `en`/`zh`) | The panel, HUD, tuning knobs, settings row, and the dock's guide entry |
+| **Display metadata** | `locale/en.json`, `locale/zh.json` | This plugin's title and description in the plugin list |
+
+The UI dictionaries go through the framework locale service and are inline in `client.js`,
+carrying identical key sets so a missing key can never surface as a raw key name.
+`{name}` placeholders are filled by the local `fill()` helper, since the framework's
+`t()` returns templates verbatim.
+
+The `locale/*.json` files follow the sibling-plugin convention and hold **only**
+`meta.title` / `meta.description` for the plugin list — they are read by the host, not by
+the client bundle. UI copy deliberately does not live there: plugin files are served over
+`/plugins/<id>/`, which accepts only `client.js` and its chunks, so a browser-side
+`fetch('locale/en.json')` would 404.
 
 - `en` is the default and the framework's fallback locale.
 - `zh` (简体中文) is selected automatically when the app language is Chinese.
 
 Switch languages from **Settings → General → Language**; the panel and its guide entry
-update live, with no reload and no re-registration. Both dictionaries are inline in
-`client.js` and carry identical key sets, so a missing key can never surface as a raw
-key name. `{name}` placeholders are filled by the local `fill()` helper, since the
-framework's `t()` returns templates verbatim.
+update live, with no reload and no re-registration.
 
 ## Controls
 

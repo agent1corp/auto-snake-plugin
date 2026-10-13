@@ -6,16 +6,24 @@
   "description": "Autonomous neon Snake for the DSH right sidebar: watch the agent play, and tune the AI live from chat.",
   "license": "MIT",
   "main": "index.js",
+  "icon": "./icon.svg",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agent1corp/auto-snake-plugin.git"
+  },
   "exports": {
     ".": "./index.js",
     "./client": "./client.js",
     "./cordis.patch.yml": "./cordis.patch.yml",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
   },
   "files": [
     "index.js",
     "client.js",
     "cordis.patch.yml",
+    "icon.svg",
+    "locale/",
     "README.md"
   ],
   "keywords": [
