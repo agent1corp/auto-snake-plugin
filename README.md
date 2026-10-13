@@ -1,4 +1,12 @@
-# dsh-auto-snake
+# Auto Snake (`dsh-auto-snake`)
+
+[![version](https://img.shields.io/badge/version-0.0.1-blue?style=flat-square)](https://github.com/agent1corp/auto-snake-plugin/releases/tag/v0.0.1)
+[![platform](https://img.shields.io/badge/platform-DeepSeek%20Harness-6f42c1?style=flat-square)](https://github.com/deepseek-ai/deepseek-harness)
+[![type](https://img.shields.io/badge/type-Client--only-0aa?style=flat-square)](#layout)
+[![AI](https://img.shields.io/badge/AI-self--playing-2ea44f?style=flat-square)](#the-solver)
+[![i18n](https://img.shields.io/badge/i18n-en%20%7C%20zh-4cc9f0?style=flat-square)](#languages)
+[![visibility](https://img.shields.io/badge/visibility-private-lightgrey?style=flat-square)](https://github.com/agent1corp/auto-snake-plugin)
+[![plugin](https://img.shields.io/badge/DSH-plugin-555?style=flat-square)](https://github.com/agent1corp/auto-snake-plugin)
 
 **v0.0.1** — an autonomous neon Snake game for the DeepSeek Harness right sidebar. Let the agent play while you watch, or take the wheel and tune the solver live from chat.
 
