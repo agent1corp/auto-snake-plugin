@@ -48,8 +48,16 @@ The panel also tracks AI runs, peak score, and deaths split by cause (wall vs se
 
 ## Install
 
+From a checkout of this repository, install it into the `web` profile by path:
+
 ```bash
-dsh plugin --profile web add /home/dev/A1Corp/myprojects/dsh-plugins/auto-snake-plugin
+dsh plugin --profile web add "$PWD"
+```
+
+Or from anywhere, using an explicit checkout path:
+
+```bash
+dsh plugin --profile web add /path/to/auto-snake-plugin
 ```
 
 Then restart `dsh web`. The bundle is addressed by package name in `cordis.patch.yml` — an entry named by `file://` URL has no package to read, so no browser bundle is emitted.
