@@ -10,6 +10,11 @@
 
 **v0.0.1** — an autonomous neon Snake game for the DeepSeek Harness right sidebar. Let the agent play while you watch, or take the wheel and tune the solver live from chat.
 
+<img width="180" height="300" alt="image" src="https://github.com/user-attachments/assets/7581366a-32ac-44ce-a1bb-100955b120f2" /><img width="180" height="300" alt="image" src="https://github.com/user-attachments/assets/923bc5a0-9ee1-41bb-89bf-f0df49ee1b4d" /><img width="180" height="300" alt="image" src="https://github.com/user-attachments/assets/a497127a-314f-4877-a2cc-11358e4005e4" />
+
+
+
+
 ## What it is
 
 A DSH client bundle that adds a Snake panel to the right sidebar. The snake can be driven three ways:
